@@ -1,1 +1,19 @@
-print("hello world!")
+import requests
+
+# URL deines Discord-Webhooks
+webhook_url = "https://discord.com/api/webhooks/1311521773724110929/Rq1xi7i-HpbSE1cFWp4tgZS8UYrlZRVK1AwrFWghM66fAxOD_NT_ArUK82eD4e2uASCA"
+
+# Nachricht, die du senden möchtest
+message = {
+    "content": "Hello, this is a message sent via Python!"
+}
+
+# Senden der Nachricht
+response = requests.post(webhook_url, json=message)
+
+# Überprüfung der Antwort
+if response.status_code == 204:
+    print("Nachricht erfolgreich gesendet!")
+else:
+    print(f"Fehler beim Senden der Nachricht: {response.status_code}")
+    print(response.text)
